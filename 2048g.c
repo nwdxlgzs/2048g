@@ -18,6 +18,7 @@ static char g_save_dir[512] = "game_records";
 static int g_min_tile = 32768;
 static int g_max_records = 64;
 static int g_stop_step = 0;
+static int g_target_tile = 0; /* 新增：目标tile，0表示禁用 */
 static volatile int g_stop = 0;
 
 static void signal_handler(int sig)
@@ -160,6 +161,37 @@ static void worker_loop(void)
             {
                 board = game_add_random_tile(board);
             }
+
+            /* 检查是否达到目标tile（在移动后） */
+            int new_max = game_max_tile_value(board);
+            if (g_target_tile > 0 && new_max >= g_target_tile)
+            {
+                /* 将新棋盘作为最后一步加入历史 */
+                if (step >= (int)cap)
+                {
+                    cap *= 2;
+                    uint64_t *new_board = realloc(board_history, cap * sizeof(uint64_t));
+                    float (*new_conf)[4] = realloc(conf_history, cap * sizeof(float[4]));
+                    if (!new_board || !new_conf)
+                    {
+                        free(board_history);
+                        free(conf_history);
+                        fprintf(stderr, "realloc failed\n");
+                        return;
+                    }
+                    board_history = new_board;
+                    conf_history = new_conf;
+                }
+                /* 重新计算新棋盘的置信度 */
+                float new_scores[4], new_conf[4];
+                game_compute_scores(board, new_scores);
+                game_normalize_scores(new_scores, new_conf);
+                board_history[step] = board;
+                memcpy(conf_history[step], new_conf, sizeof(new_conf));
+                step++;
+                record = 1;
+                break;
+            }
         }
 
         if (record)
@@ -180,6 +212,7 @@ static void print_usage(const char *prog)
     fprintf(stderr, "  --min_tile VALUE    Minimum tile value to record game (default 32768)\n");
     fprintf(stderr, "  --max_records N     Max CSV files in save_dir (default 64)\n");
     fprintf(stderr, "  --stop STEPS        Stop after this many steps and record (default 0 = unlimited)\n");
+    fprintf(stderr, "  --target_tile N     Stop immediately when a tile of this value appears (default 0 = disabled)\n");
     fprintf(stderr, "  --help              Show this help\n");
 }
 
@@ -215,6 +248,12 @@ static void parse_args(int argc, char **argv)
             g_stop_step = atoi(argv[++i]);
             if (g_stop_step < 0)
                 g_stop_step = 0;
+        }
+        else if (strcmp(argv[i], "--target_tile") == 0 && i + 1 < argc)
+        {
+            g_target_tile = atoi(argv[++i]);
+            if (g_target_tile < 0)
+                g_target_tile = 0;
         }
         else if (strcmp(argv[i], "--help") == 0)
         {
