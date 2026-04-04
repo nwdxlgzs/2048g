@@ -28,6 +28,7 @@ gcc -O3 -Wall -Wextra -std=c99 -fPIC -D_GNU_SOURCE -o 2048g 2048g.c game.c platf
 ```
 
 ## 关闭
+
 ```bash
 # Linux
 pkill -9 2048g
