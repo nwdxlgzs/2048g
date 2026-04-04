@@ -27,6 +27,14 @@ gcc -O3 -Wall -Wextra -std=c99 -fPIC -D_GNU_SOURCE -o 2048g 2048g.c game.c platf
 ./2048g [选项]
 ```
 
+## 关闭
+```bash
+# Linux
+pkill -9 2048g
+# Windows
+Ctrl + C
+```
+
 ### 选项
 
 | 参数              | 说明                                   | 默认值          |
