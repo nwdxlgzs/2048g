@@ -22,7 +22,7 @@ static char g_save_dir[512] = "game_records";
 static int g_min_tile = 32768;
 static int g_max_records = 64;
 static int g_stop_step = 0;
-static int g_target_tile = 0; /* 新增：目标tile，0表示禁用 */
+static int g_target_tile = 0;
 static volatile int g_stop = 0;
 
 static void signal_handler(int sig)
