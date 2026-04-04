@@ -56,14 +56,20 @@ static void ht_init(void)
     if (hash_table)
         return;
     hash_table = (hash_entry_t *)calloc(HASH_SIZE, sizeof(hash_entry_t));
+    if (!hash_table)
+    {
+        fprintf(stderr, "Failed to allocate hash table (size %d)\n", HASH_SIZE);
+        exit(1);
+    }
 }
 
 static void ht_clear(void)
 {
     if (hash_table)
+    {
         memset(hash_table, 0, HASH_SIZE * sizeof(hash_entry_t));
+    }
 }
-
 static int ht_find(uint64_t board, uint8_t curdepth, float *heuristic)
 {
     unsigned idx = hash_func(board);

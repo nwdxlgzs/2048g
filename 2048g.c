@@ -12,6 +12,10 @@
 #ifdef _WIN32
 #include <windows.h>
 #endif
+#ifdef __linux__
+#include <sys/wait.h>
+#include <unistd.h>
+#endif
 
 static int g_fork_count = 1;
 static char g_save_dir[512] = "game_records";

@@ -255,7 +255,14 @@ void platform_set_env(const char *name, const char *value)
 #ifdef _WIN32
     SetEnvironmentVariableA(name, value);
 #else
-    setenv(name, value, 1);
+    if (value == NULL)
+    {
+        unsetenv(name);
+    }
+    else
+    {
+        setenv(name, value, 1);
+    }
 #endif
 }
 
